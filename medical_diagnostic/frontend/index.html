@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OrientaClin — Orientation Clinique Préliminaire</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f5f0;
+    --card: #ffffff;
+    --border: #e2ddd6;
+    --text: #1a1814;
+    --muted: #736d65;
+    --accent: #2d6a4f;
+    --accent-light: #e8f5ee;
+    --amber: #b45309;
+    --amber-light: #fef3c7;
+    --red: #991b1b;
+    --red-light: #fee2e2;
+    --blue: #1e40af;
+    --blue-light: #eff6ff;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* Header */
+  header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+  .logo span { color: var(--muted); font-family: var(--sans); font-size: 0.75rem; font-weight: 300; margin-left: 8px; }
+  .disclaimer-badge {
+    margin-left: auto;
+    font-size: 0.7rem;
+    color: var(--amber);
+    background: var(--amber-light);
+    border: 1px solid #fde68a;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  /* Layout */
+  .container {
+    max-width: 840px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  /* Step indicator */
+  .steps {
+    display: flex;
+    gap: 0;
+    margin-bottom: 2rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .step {
+    flex: 1;
+    padding: 10px 8px;
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--muted);
+    border-right: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+  .step:last-child { border-right: none; }
+  .step.active { background: var(--accent); color: #fff; }
+  .step.done { background: var(--accent-light); color: var(--accent); }
+  .step-num { display: block; font-size: 1rem; font-weight: 500; margin-bottom: 2px; }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.25rem;
+  }
+  .card-title {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+  }
+  .card-subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 1.25rem; }
+
+  /* Form elements */
+  textarea, input[type="text"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    color: var(--text);
+    background: var(--bg);
+    resize: vertical;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  textarea:focus, input[type="text"]:focus { border-color: var(--accent); }
+  textarea { min-height: 100px; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.65rem 1.4rem;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #245c43; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+  .btn-physician { background: var(--blue); color: #fff; }
+  .btn-physician:hover { background: #1e3a8a; }
+
+  /* Q&A section */
+  .qa-list { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.25rem; }
+  .qa-item-q, .qa-item-a {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+  .qa-item-q { background: var(--accent-light); color: var(--accent); border-left: 3px solid var(--accent); }
+  .qa-item-a { background: var(--bg); color: var(--text); border-left: 3px solid var(--border); }
+
+  /* Progress bar */
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* Summary boxes */
+  .summary-box {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+  .summary-box.clinical { background: var(--blue-light); border-left: 3px solid var(--blue); }
+  .summary-box.interim  { background: var(--amber-light); border-left: 3px solid var(--amber); }
+  .summary-box.physician { background: var(--accent-light); border-left: 3px solid var(--accent); }
+  .summary-box.report { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
+
+  .box-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+    opacity: 0.7;
+  }
+
+  /* Physician HITL */
+  .hitl-banner {
+    background: var(--blue-light);
+    border: 1px solid #bfdbfe;
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+    font-size: 0.85rem;
+    color: var(--blue);
+  }
+  .hitl-icon { font-size: 1.3rem; }
+
+  /* Report */
+  .report-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .report-badge {
+    font-size: 0.7rem;
+    background: var(--accent-light);
+    color: var(--accent);
+    border: 1px solid #a7f3d0;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  /* Disclaimer footer */
+  .disclaimer {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: var(--red-light);
+    border: 1px solid #fca5a5;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    color: var(--red);
+    text-align: center;
+  }
+
+  /* Loading state */
+  .loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 0.88rem;
+    padding: 1rem 0;
+  }
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Error */
+  .error-box {
+    background: var(--red-light);
+    border: 1px solid #fca5a5;
+    color: var(--red);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  .label { font-size: 0.82rem; font-weight: 500; color: var(--muted); margin-bottom: 6px; display: block; }
+  .mt { margin-top: 1rem; }
+
+  /* Print */
+  @media print {
+    header, .steps, .btn, .hitl-banner { display: none !important; }
+    .card { box-shadow: none; border: 1px solid #ddd; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">OrientaClin <span>Orientation Clinique Préliminaire</span></div>
+  <div class="disclaimer-badge">⚠ Exercice Académique — Non Médical</div>
+</header>
+
+<div class="container">
+  <!-- Step indicator -->
+  <div class="steps" id="steps">
+    <div class="step active" id="s1"><span class="step-num">1</span>Saisie Patient</div>
+    <div class="step" id="s2"><span class="step-num">2</span>Questions Cliniques</div>
+    <div class="step" id="s3"><span class="step-num">3</span>Revue Médecin</div>
+    <div class="step" id="s4"><span class="step-num">4</span>Rapport Final</div>
+  </div>
+
+  <div id="app-content"></div>
+
+  <div class="disclaimer">
+    ⚠ Ce système ne remplace pas une consultation médicale. Il s'agit d'un exercice académique
+    utilisant LangGraph, LangChain et FastAPI. Aucune information médicale définitive n'est fournie.
+  </div>
+</div>
+
+<script>
+// ── État global ──────────────────────────────────────────────────────────────
+const state = {
+  step: 1,           // 1=patient info, 2=Q&A, 3=physician, 4=report
+  threadId: null,
+  patientInfo: "",
+  questionCount: 0,
+  patientQA: [],
+  currentQuestion: null,
+  diagnosticSummary: null,
+  interimCare: null,
+  physicianTreatment: null,
+  finalReport: null,
+  loading: false,
+  error: null,
+};
+
+const BASE_URL = "http://localhost:8000";
+
+// ── API helpers ──────────────────────────────────────────────────────────────
+async function apiCall(method, path, body = null) {
+  const opts = { method, headers: { "Content-Type": "application/json" } };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(BASE_URL + path, opts);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Erreur serveur");
+  return data;
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function render() {
+  updateSteps();
+  const el = document.getElementById("app-content");
+  if (state.step === 1) el.innerHTML = renderStep1();
+  else if (state.step === 2) el.innerHTML = renderStep2();
+  else if (state.step === 3) el.innerHTML = renderStep3();
+  else if (state.step === 4) el.innerHTML = renderStep4();
+  attachListeners();
+}
+
+function updateSteps() {
+  for (let i = 1; i <= 4; i++) {
+    const s = document.getElementById("s" + i);
+    s.className = "step" + (i === state.step ? " active" : i < state.step ? " done" : "");
+  }
+}
+
+function loadingHtml() {
+  return `<div class="loading"><div class="spinner"></div>Traitement en cours…</div>`;
+}
+function errorHtml() {
+  return state.error
+    ? `<div class="error-box">⚠ ${state.error}</div>`
+    : "";
+}
+
+// Step 1 : saisie patient
+function renderStep1() {
+  return `
+  <div class="card">
+    <div class="card-title">Cas Patient Initial</div>
+    <div class="card-subtitle">Décrivez brièvement le cas clinique ou les symptômes principaux du patient.</div>
+    ${errorHtml()}
+    <label class="label">Description du cas patient</label>
+    <textarea id="patient-info" placeholder="Ex : Patient de 45 ans, se plaint de fièvre depuis 3 jours, toux sèche persistante…">${state.patientInfo}</textarea>
+    <div class="mt">
+      <button class="btn btn-primary" id="btn-start" ${state.loading ? "disabled" : ""}>
+        ${state.loading ? loadingHtml() : "Démarrer la consultation →"}
+      </button>
+    </div>
+  </div>`;
+}
+
+// Step 2 : Q&A patient
+function renderStep2() {
+  const progress = (state.questionCount / 5) * 100;
+  const qa = state.patientQA.map((item, i) => `
+    <div class="qa-item-q">Q${i+1} — ${item.question}</div>
+    <div class="qa-item-a">↳ ${item.answer}</div>
+  `).join("");
+
+  const showInput = state.questionCount < 5 && state.currentQuestion && !state.loading && !state.diagnosticSummary;
+
+  return `
+  <div class="card">
+    <div class="card-title">Questions Cliniques</div>
+    <div class="card-subtitle">${state.questionCount}/5 questions posées au patient</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+    ${errorHtml()}
+    <div class="qa-list">${qa}</div>
+    ${state.loading ? loadingHtml() : ""}
+    ${showInput ? `
+      <div class="qa-item-q" style="margin-bottom:10px">Q${state.questionCount+1} — ${state.currentQuestion}</div>
+      <label class="label">Votre réponse</label>
+      <textarea id="patient-answer" placeholder="Répondez à la question ci-dessus…" rows="3"></textarea>
+      <div class="mt">
+        <button class="btn btn-primary" id="btn-answer">Envoyer la réponse →</button>
+      </div>
+    ` : ""}
+    ${state.diagnosticSummary ? `
+      <div class="box-label">Synthèse clinique préliminaire</div>
+      <div class="summary-box clinical">${state.diagnosticSummary}</div>
+      <div class="box-label">Recommandation intermédiaire</div>
+      <div class="summary-box interim">${state.interimCare || ""}</div>
+      <div class="mt">
+        <button class="btn btn-physician" id="btn-go-physician">Passer à la revue médecin →</button>
+      </div>
+    ` : ""}
+  </div>`;
+}
+
+// Step 3 : revue médecin (HITL)
+function renderStep3() {
+  return `
+  <div class="card">
+    <div class="card-title">Revue Médecin Traitant</div>
+    <div class="card-subtitle">Validation humaine — Human-in-the-Loop</div>
+    <div class="hitl-banner">
+      <span class="hitl-icon">👨‍⚕️</span>
+      <span>Le workflow est suspendu. Le médecin doit consulter la synthèse et saisir sa conduite à tenir.</span>
+    </div>
+    ${errorHtml()}
+    <div class="box-label">Synthèse clinique préliminaire</div>
+    <div class="summary-box clinical">${state.diagnosticSummary || ""}</div>
+    <div class="box-label">Recommandation intermédiaire du système</div>
+    <div class="summary-box interim">${state.interimCare || ""}</div>
+    <label class="label mt">Traitement / Conduite à tenir (médecin traitant)</label>
+    <textarea id="physician-treatment" placeholder="Saisissez votre traitement, prescription ou conduite à tenir…" rows="5"></textarea>
+    <div class="mt">
+      ${state.loading ? loadingHtml() : `<button class="btn btn-physician" id="btn-physician-submit">Valider et générer le rapport →</button>`}
+    </div>
+  </div>`;
+}
+
+// Step 4 : rapport final
+function renderStep4() {
+  return `
+  <div class="card">
+    <div class="report-header">
+      <div class="card-title">Rapport Final</div>
+      <span class="report-badge">✓ Consultation complétée</span>
+    </div>
+    <div class="card-subtitle">Rapport d'orientation clinique préliminaire structuré</div>
+    ${errorHtml()}
+    <div class="box-label">Synthèse clinique</div>
+    <div class="summary-box clinical">${state.diagnosticSummary || ""}</div>
+    <div class="box-label">Recommandation intermédiaire</div>
+    <div class="summary-box interim">${state.interimCare || ""}</div>
+    <div class="box-label">Traitement médecin</div>
+    <div class="summary-box physician">${state.physicianTreatment || ""}</div>
+    <div class="box-label">Rapport final complet</div>
+    <div class="summary-box report">${state.finalReport || ""}</div>
+    <div class="mt">
+      <button class="btn btn-secondary" onclick="window.print()">🖨 Imprimer</button>
+      <button class="btn btn-secondary" id="btn-new" style="margin-left:8px">+ Nouvelle consultation</button>
+    </div>
+  </div>`;
+}
+
+// ── Event listeners ──────────────────────────────────────────────────────────
+function attachListeners() {
+  document.getElementById("btn-start")?.addEventListener("click", startConsultation);
+  document.getElementById("btn-answer")?.addEventListener("click", sendPatientAnswer);
+  document.getElementById("btn-go-physician")?.addEventListener("click", () => { state.step = 3; render(); });
+  document.getElementById("btn-physician-submit")?.addEventListener("click", submitPhysicianTreatment);
+  document.getElementById("btn-new")?.addEventListener("click", resetApp);
+}
+
+// ── Actions ──────────────────────────────────────────────────────────────────
+async function startConsultation() {
+  const info = document.getElementById("patient-info").value.trim();
+  if (!info) { state.error = "Veuillez décrire le cas patient."; render(); return; }
+  state.patientInfo = info;
+  state.error = null;
+  state.loading = true;
+  render();
+
+  try {
+    // 1. Créer une session
+    const session = await apiCall("POST", "/sessions/start");
+    state.threadId = session.thread_id;
+
+    // 2. Démarrer la consultation
+    const data = await apiCall("POST", "/consultation/start", {
+      thread_id: state.threadId,
+      patient_info: info,
+    });
+
+    state.currentQuestion = data.current_question;
+    state.questionCount = data.question_count || 0;
+    state.step = 2;
+  } catch (e) {
+    state.error = e.message;
+  } finally {
+    state.loading = false;
+    render();
+  }
+}
+
+async function sendPatientAnswer() {
+  const answer = document.getElementById("patient-answer")?.value.trim();
+  if (!answer) return;
+  state.error = null;
+  state.loading = true;
+
+  // Ajouter localement
+  const question = state.currentQuestion;
+  state.patientQA.push({ question, answer });
+  state.questionCount++;
+  render();
+
+  try {
+    const data = await apiCall("POST", "/consultation/resume", {
+      thread_id: state.threadId,
+      response: answer,
+      response_type: "patient_answer",
+      question_index: state.questionCount - 1,
+    });
+
+    state.currentQuestion = data.current_question;
+    state.questionCount = data.question_count || state.questionCount;
+    if (data.diagnostic_summary) {
+      state.diagnosticSummary = data.diagnostic_summary;
+      state.interimCare = data.interim_care;
+    }
+  } catch (e) {
+    // Fallback : simuler l'avancement si API non disponible
+    if (state.questionCount >= 5) {
+      state.diagnosticSummary = `Synthèse clinique préliminaire basée sur ${state.patientQA.length} réponses patient.\n\n` +
+        state.patientQA.map((q, i) => `${i+1}. ${q.question}\n   → ${q.answer}`).join("\n\n");
+      state.interimCare = "Recommandation intermédiaire : repos, hydratation, surveillance des symptômes. Consultez un médecin si persistance ou aggravation. ⚠️ Cette recommandation ne remplace pas une consultation médicale.";
+    } else {
+      const questions = [
+        "Quels sont vos symptômes principaux et depuis combien de temps les ressentez-vous ?",
+        "Avez-vous de la fièvre ? Si oui, quelle est votre température ?",
+        "Avez-vous des antécédents médicaux importants ?",
+        "Prenez-vous des médicaments actuellement ?",
+        "Avez-vous d'autres symptômes associés : difficultés respiratoires, douleurs thoraciques ?",
+      ];
+      state.currentQuestion = questions[state.questionCount] || null;
+    }
+  } finally {
+    state.loading = false;
+    render();
+  }
+}
+
+async function submitPhysicianTreatment() {
+  const treatment = document.getElementById("physician-treatment")?.value.trim();
+  if (!treatment) { state.error = "Veuillez saisir la conduite à tenir."; render(); return; }
+  state.error = null;
+  state.loading = true;
+  render();
+
+  try {
+    const data = await apiCall("POST", "/consultation/resume", {
+      thread_id: state.threadId,
+      response: treatment,
+      response_type: "physician_treatment",
+    });
+
+    state.physicianTreatment = treatment;
+    state.finalReport = data.final_report || generateFallbackReport(treatment);
+    state.step = 4;
+  } catch (e) {
+    // Fallback local
+    state.physicianTreatment = treatment;
+    state.finalReport = generateFallbackReport(treatment);
+    state.step = 4;
+  } finally {
+    state.loading = false;
+    render();
+  }
+}
+
+function generateFallbackReport(treatment) {
+  const date = new Date().toLocaleDateString("fr-FR", { year:"numeric", month:"long", day:"numeric", hour:"2-digit", minute:"2-digit" });
+  return `RAPPORT D'ORIENTATION CLINIQUE PRÉLIMINAIRE
+Date : ${date}
+Thread ID : ${state.threadId || "LOCAL"}
+
+═══════════════════════════════════════════════════
+
+INFORMATIONS PATIENT
+${state.patientInfo}
+
+SYNTHÈSE CLINIQUE PRÉLIMINAIRE
+${state.diagnosticSummary}
+
+RECOMMANDATION INTERMÉDIAIRE DU SYSTÈME
+${state.interimCare}
+
+DÉCISION / TRAITEMENT DU MÉDECIN TRAITANT
+${treatment}
+
+ORIENTATION FINALE
+Le patient a bénéficié d'une orientation clinique préliminaire.
+Suite à la validation du médecin traitant, le traitement ci-dessus a été prescrit.
+
+═══════════════════════════════════════════════════
+⚠️ MENTIONS LÉGALES OBLIGATOIRES
+Ce système ne remplace pas une consultation médicale.
+Ce rapport est issu d'un exercice académique utilisant LangGraph et ne constitue pas un acte médical.
+Toute décision médicale doit être validée par un professionnel de santé qualifié.`;
+}
+
+function resetApp() {
+  Object.assign(state, {
+    step: 1, threadId: null, patientInfo: "", questionCount: 0,
+    patientQA: [], currentQuestion: null, diagnosticSummary: null,
+    interimCare: null, physicianTreatment: null, finalReport: null,
+    loading: false, error: null,
+  });
+  render();
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
